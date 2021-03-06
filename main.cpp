@@ -38,11 +38,10 @@ int main(int argc, char** argv) {
     } else if (argc == 2) {
         fileName = argv[1];
 
-        // Get rid of existing extension and add .sp2020
-        size_t lastIndex = fileName.find_last_of('.');
-        // TODO: Change file type
-        string rawName = fileName.substr(0, lastIndex);
-        fileName = rawName.append(".sp2020");
+        if (fileName.substr(fileName.find_last_of('.') + 1) != "fs") {
+            cout << "[Error]: File names must have extension .fs" << endl;
+            return 0;
+        }
 
     // Too many arguments were entered
     } else {

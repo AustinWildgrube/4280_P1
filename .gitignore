@@ -136,7 +136,7 @@ Temporary Items
 .apdisk
 
 # End of https://www.toptal.com/developers/gitignore/api/clion,macos
-/test_data.sp2020
+/test_data.fs
 /temp_data.txt
 /main.o
 /CMakeLists.txt
