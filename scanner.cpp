@@ -215,8 +215,10 @@ void Scanner::scan(const char* fileName) {
         }
 
         // Increase line number if we reach a new row
-        if (character == '\n')
+        if (character == '\n') {
             lineNumber++;
+            character = getc(file);
+        }
 
     } while (character != EOF);
 }
