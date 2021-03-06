@@ -9,8 +9,6 @@
 
 using namespace std;
 
-Scanner scanner;
-
 /**
  * This is the main function of our program where we collect command line arguments
  * and the call the function to build and print the tree.
@@ -30,7 +28,7 @@ int main(int argc, char** argv) {
         cout << "Enter a string and type quit to stop: " << endl;
 
         // Collect content and place in file until quit is entered
-        while (cin >> inputString) {
+        while (getline(cin, inputString)) {
             if (inputString == "quit")
                 break;
             else
