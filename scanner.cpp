@@ -92,10 +92,11 @@ int stateTable[22][22] = {
 
 void Scanner::scan() {
     FILE *file;
+    string tempString;
     char character, lookAhead;
     int token, column;
     int state = 0;
-    string tempString;
+    int lineNumber = 1;
 
     file = fopen("temp_data.txt", "r");
 
@@ -104,8 +105,9 @@ void Scanner::scan() {
         character = getc(file);
         lookAhead = getc(file);
 
+        // Check for comments
         if (character == '$' && lookAhead == '$') {
-           //keep getting character if char is $ then look agead
+           //keep getting character if char is $ then look ahead
            do {
                character = getc(file);
 
@@ -137,9 +139,9 @@ void Scanner::scan() {
 
             // Check to see if the words are keywords
             if (checkKeywords(word))
-                Scanner::getPrintStatement(1001, word, 3);
+                Scanner::getPrintStatement(1001, word, lineNumber);
             else
-                Scanner::getPrintStatement(1002, word, 3);
+                Scanner::getPrintStatement(1002, word, lineNumber);
 
             ungetc(character, file);
         } else {
@@ -157,7 +159,7 @@ void Scanner::scan() {
             if (state != 0 && (character == '\n' || isspace(character))) {
                 token = Scanner::searchTokens(state, 21);
 
-                Scanner::getPrintStatement(token, tempString, 3);
+                Scanner::getPrintStatement(token, tempString, lineNumber);
 
                 tempString.clear();
                 state = 0;
@@ -172,11 +174,11 @@ void Scanner::scan() {
                 } else if (token >= 1000) {
                     if (!tempString.empty()) {
                         tempString.push_back(character);
-                        Scanner::getPrintStatement(token, tempString, 3);
+                        Scanner::getPrintStatement(token, tempString, lineNumber);
                         tempString.clear();
                     } else {
                         string characterToString(1, character);
-                        Scanner::getPrintStatement(token, characterToString, 3);
+                        Scanner::getPrintStatement(token, characterToString, lineNumber);
                     }
 
                     state = 0;
@@ -185,7 +187,7 @@ void Scanner::scan() {
                 } else if (token == -1) {
                     token = Scanner::searchTokens(state, 21);
 
-                    Scanner::getPrintStatement(token, tempString, 3);
+                    Scanner::getPrintStatement(token, tempString, lineNumber);
                     tempString.clear();
 
                     // Reset our state and put back the look ahead character
@@ -196,6 +198,11 @@ void Scanner::scan() {
                 }
             }
         }
+
+        // Increase line number if we reach a new row
+        if (character == '\n')
+            lineNumber++;
+
     } while (character != EOF);
 }
 

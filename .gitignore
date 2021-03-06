@@ -138,4 +138,7 @@ Temporary Items
 # End of https://www.toptal.com/developers/gitignore/api/clion,macos
 /test_data.sp2020
 /temp_data.txt
+/main.o
 /CMakeLists.txt
+/P1
+/scanner.o
