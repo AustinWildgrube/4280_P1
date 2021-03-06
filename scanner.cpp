@@ -39,6 +39,7 @@ int stateTable[22][22] = {
             -2  : Incorrect start token
             -1  : Incorrect next token
 
+            1000: EOF
             1001: Keyword
             1002: Identifier
             1003: Number
@@ -235,6 +236,8 @@ void Scanner::scan(const char* fileName) {
         }
 
     } while (character != EOF);
+
+    getPrintStatement(1000, "", lineNumber);
 }
 
 int Scanner::getColumn(char character) {
@@ -289,11 +292,22 @@ void Scanner::getPrintStatement(int tokenNumber, const string& userInput, int li
         "ID_tk",
         "NUM_tk",
         "OP_tk",
-        "DEL_tk"
+        "DEL_tk",
+        "EOF_tk"
+    };
+
+    string tokenName[] {
+        "Keyword",
+        "Identifier",
+        "Number",
+        "Operator",
+        "Delimiter",
+        "End of Line"
     };
 
     struct Token {
         string id;
+        string name;
         int successId = 0;
         string userInput;
         int lineNumber = 0;
@@ -304,18 +318,31 @@ void Scanner::getPrintStatement(int tokenNumber, const string& userInput, int li
     token.userInput = userInput;
     token.lineNumber = lineNumber;
 
-    if (tokenNumber == 1001)
-       token.id = tokenID[0];
-    else if (tokenNumber == 1002)
+    if (tokenNumber == 1000) {
+        token.id = tokenID[5];
+        token.name = tokenName[5];
+    } else if (tokenNumber == 1001) {
+        token.id = tokenID[0];
+        token.name = tokenName[0];
+    } else if (tokenNumber == 1002) {
         token.id = tokenID[1];
-    else if (tokenNumber == 1003)
+        token.name = tokenName[1];
+    } else if (tokenNumber == 1003) {
         token.id = tokenID[2];
-    else if (tokenNumber >= 1004 && tokenNumber <= 1014)
+        token.name = tokenName[2];
+    } else if (tokenNumber >= 1004 && tokenNumber <= 1014) {
         token.id = tokenID[3];
-    else if (tokenNumber >= 1015)
+        token.name = tokenName[3];
+    } else if (tokenNumber >= 1015) {
         token.id = tokenID[4];
+        token.name = tokenName[4];
+    }
 
-    cout << token.id << " " << token.successId << " " << token.userInput << " " << token.lineNumber << endl;
+    cout << token.lineNumber << "\t";
+    cout << token.name << "\t";
+    cout << token.id << "\t\t";
+    cout << token.successId << "\t\t";
+    cout << token.userInput << endl;
 }
 
 void Scanner::getErrorStatement(const string& userInput, int lineNumber) {
