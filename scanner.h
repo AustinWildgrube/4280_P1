@@ -14,6 +14,7 @@ class Scanner {
         static int searchTokens(int, int);
         static bool checkKeywords(const std::string&);
         static void getPrintStatement(int, const std::string&, int);
+        static void getErrorStatement(const std::string&, int);
 };
 
 #endif //SCANNER_H

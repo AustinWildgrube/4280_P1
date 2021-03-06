@@ -145,56 +145,65 @@ void Scanner::scan() {
 
             ungetc(character, file);
         } else {
-            // Get columns
-            if (isdigit(character))
-                column = 2;
-            else
-                column = Scanner::getColumn(character);
+            if (character != EOF) {
+                // Get columns
+                if (isdigit(character))
+                    column = 2;
+                else
+                    column = Scanner::getColumn(character);
 
-            // Search token
-            token = Scanner::searchTokens(state, column);
+                if (column == -99 && character != '\n' && !isspace(character)) {
+                    string cToS(1, character);
+                    Scanner::getErrorStatement(cToS, lineNumber);
+                } else {
 
-            // If the states is not 0 and there is a space or new line just
-            // get the token without the look a head.
-            if (state != 0 && (character == '\n' || isspace(character))) {
-                token = Scanner::searchTokens(state, 21);
+                    // Search token
+                    token = Scanner::searchTokens(state, column);
 
-                Scanner::getPrintStatement(token, tempString, lineNumber);
+                    // If the states is not 0 and there is a space or new line just
+                    // get the token without the look a head.
+                    if (state != 0 && (character == '\n' || isspace(character))) {
+                        token = Scanner::searchTokens(state, 21);
 
-                tempString.clear();
-                state = 0;
-            } else {
-                // Token search returned another state
-                if (token > 0 && token <= 22) {
-                    state = token;
-
-                    tempString.push_back(character);
-
-                // We reached a final token
-                } else if (token >= 1000) {
-                    if (!tempString.empty()) {
-                        tempString.push_back(character);
                         Scanner::getPrintStatement(token, tempString, lineNumber);
+
                         tempString.clear();
+                        state = 0;
                     } else {
-                        string characterToString(1, character);
-                        Scanner::getPrintStatement(token, characterToString, lineNumber);
+                        // Token search returned another state
+                        if (token > 0 && token <= 22) {
+                            state = token;
+
+                            tempString.push_back(character);
+
+                            // We reached a final token
+                        } else if (token >= 1000 && token <= 1023) {
+                            if (!tempString.empty()) {
+                                tempString.push_back(character);
+                                Scanner::getPrintStatement(token, tempString, lineNumber);
+                                tempString.clear();
+                            } else {
+                                string characterToString(1, character);
+                                Scanner::getPrintStatement(token, characterToString, lineNumber);
+                            }
+
+                            state = 0;
+
+                            // There was no white space between tokens and the two did not go together
+                        } else if (token == -1) {
+                            token = Scanner::searchTokens(state, 21);
+
+                            Scanner::getPrintStatement(token, tempString, lineNumber);
+                            tempString.clear();
+
+                            // Reset our state and put back the look ahead character
+                            state = 0;
+                            ungetc(character, file);
+                        } else if (token == -2) {
+                            Scanner::getErrorStatement(tempString, lineNumber);
+                            tempString.clear();
+                        }
                     }
-
-                    state = 0;
-
-                // There was no white space between tokens and the two did not go together
-                } else if (token == -1) {
-                    token = Scanner::searchTokens(state, 21);
-
-                    Scanner::getPrintStatement(token, tempString, lineNumber);
-                    tempString.clear();
-
-                    // Reset our state and put back the look ahead character
-                    state = 0;
-                    ungetc(character, file);
-                } else if (token == -2) {
-                    cout << "Invalid token..." << endl;
                 }
             }
         }
@@ -215,7 +224,7 @@ int Scanner::getColumn(char character) {
     }
 
     // Not found
-    return -1;
+    return -99;
 }
 
 int Scanner::searchTokens(int state, int column) {
@@ -252,7 +261,6 @@ bool Scanner::checkKeywords(const string &word) {
     return false;
 }
 
-// TODO: Line number
 void Scanner::getPrintStatement(int tokenNumber, const string& userInput, int lineNumber) {
     string tokenID[] {
         "KW_tk",
@@ -286,4 +294,12 @@ void Scanner::getPrintStatement(int tokenNumber, const string& userInput, int li
         token.id = tokenID[4];
 
     cout << token.id << " " << token.successId << " " << token.userInput << " " << token.lineNumber << endl;
+}
+
+void Scanner::getErrorStatement(const string& userInput, int lineNumber) {
+    cout << endl;
+    cout << "SCANNER ERROR" << endl;
+    cout << "Line Number " << lineNumber << endl;
+    cout << "Invalid Syntax " << userInput << endl;
+    cout << endl;
 }
