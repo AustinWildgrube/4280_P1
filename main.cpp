@@ -45,11 +45,10 @@ int main(int argc, char** argv) {
 
     // Too many arguments were entered
     } else {
-        // TODO: Change output
         cout << "[Error] Too many arguments were entered!" << endl;
         cout << "[Info] Usage: ./P0" << endl;
-        cout << "[Info] Usage: ./P0 [fileName]" << endl;
-        cout << "[Info] Usage: ./P0 < fileName.sp2020" << endl;
+        cout << "[Info] Usage: ./P0 [fileName].fs" << endl;
+        cout << "[Info] Usage: ./P0 < [fileName].fs" << endl;
         return 0;
     }
 
