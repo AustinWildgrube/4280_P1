@@ -68,12 +68,12 @@ int stateTable[22][22] = {
      // { _   a     1     =     >     <     :   +   -   *   /   %   .   (   )   ,   {   }   ;   [   ]   ws   }
         { 1,  2,    3,    4,    5,    6,    7,  8,  9,  10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22   }, // State 0
 
-        { -1, 1002, 1002, -1,   -1,   -1,   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2   }, // _
+        { -1, 1002, 1002, -1,   -2,   -1,   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2   }, // _
         { -1, 2,    3,    -1,   -1,   -1,   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1002 }, // a
         { -1, -1,   3,    -1,   -1,   -1,   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1003 }, // 1
         { -1, -1,   -1,   1007, 1005, 1006, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1004 }, // =
-        { -1, -1,   -1,   -1,   -1,   -1,   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2   }, // >
-        { -1, -1,   -1,   -1,   -1,   -1,   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2   }, // <
+        { -1, -1,   -1,   -1,   -2,   -1,   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2   }, // >
+        { -1, -1,   -1,   -1,   -2,   -1,   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2   }, // <
         { -1, -1,   -1,   1009, -1,   -1,   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1008 }, // :
         { -1, -1,   -1,   -1,   -1,   -1,   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1010 }, // +
         { -1, -1,   -1,   -1,   -1,   -1,   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1011 }, // -
@@ -179,7 +179,10 @@ void Scanner::scan(const char* fileName) {
                     if (state != 0 && (character == '\n' || isspace(character) || isalpha(character))) {
                         token = Scanner::searchTokens(state, 21);
 
-                        Scanner::getPrintStatement(token, tempString, lineNumber);
+                        if (token == -2)
+                            Scanner::getErrorStatement(tempString, lineNumber);
+                        else
+                            Scanner::getPrintStatement(token, tempString, lineNumber);
 
                         tempString.clear();
                         ungetc(character, file);
@@ -215,7 +218,11 @@ void Scanner::scan(const char* fileName) {
                             state = 0;
                             ungetc(character, file);
                         } else if (token == -2) {
-                            Scanner::getErrorStatement(tempString, lineNumber);
+                            if (tempString.empty()) {
+                                string cToS(1, character);
+                                Scanner::getErrorStatement(cToS, lineNumber);
+                            } else
+                                Scanner::getErrorStatement(tempString, lineNumber);
                             tempString.clear();
                         }
                     }
