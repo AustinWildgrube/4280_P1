@@ -125,7 +125,7 @@ void Scanner::scan(const char* fileName) {
             ungetc(lookAhead, file);
 
         // We need to begin checking for keywords
-        if ((isalpha(character) || character == '_')) {
+        if ((isalpha(character) || character == '_') && tempString.empty()) {
             // start a string array to check against keywords
             string word;
             word.push_back(character);
@@ -152,7 +152,7 @@ void Scanner::scan(const char* fileName) {
                 else
                     column = Scanner::getColumn(character);
 
-                if (column == -99 && character != '\n' && !isspace(character)) {
+                if (column == -99 && character != '\n' && !isspace(character) && !isalpha(character)) {
                     string cToS(1, character);
                     Scanner::getErrorStatement(cToS, lineNumber);
                 } else {
@@ -161,12 +161,13 @@ void Scanner::scan(const char* fileName) {
 
                     // If the states is not 0 and there is a space or new line just
                     // get the token without the look a head.
-                    if (state != 0 && (character == '\n' || isspace(character))) {
+                    if (state != 0 && (character == '\n' || isspace(character) || isalpha(character))) {
                         token = Scanner::searchTokens(state, 21);
 
                         Scanner::getPrintStatement(token, tempString, lineNumber);
 
                         tempString.clear();
+                        ungetc(character, file);
                         state = 0;
                     } else {
                         // Token search returned another state
@@ -203,6 +204,12 @@ void Scanner::scan(const char* fileName) {
                             tempString.clear();
                         }
                     }
+                }
+            } else {
+                if (!tempString.empty()) {
+                    token = Scanner::searchTokens(state, 21);
+
+                    Scanner::getPrintStatement(token, tempString, lineNumber);
                 }
             }
         }
