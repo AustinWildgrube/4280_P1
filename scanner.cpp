@@ -126,24 +126,38 @@ void Scanner::scan(const char* fileName) {
 
         // We need to begin checking for keywords
         if ((isalpha(character) || character == '_') && tempString.empty()) {
-            // start a string array to check against keywords
-            string word;
-            word.push_back(character);
-            character = getc(file);
-
-            while (!isspace(character) && character != '\n' && (isalpha(character) || isdigit(character))) {
-                // Add to string
+            if (character != '_' && !islower(character)) {
+                string word;
                 word.push_back(character);
                 character = getc(file);
+
+                while (!isspace(character) && character != '\n' && (isalpha(character) || isdigit(character))) {
+                    // Add to string
+                    word.push_back(character);
+                    character = getc(file);
+                }
+
+                Scanner::getErrorStatement(word, lineNumber);
+            } else {
+                // start a string array to check against keywords
+                string word;
+                word.push_back(character);
+                character = getc(file);
+
+                while (!isspace(character) && character != '\n' && (isalpha(character) || isdigit(character))) {
+                    // Add to string
+                    word.push_back(character);
+                    character = getc(file);
+                }
+
+                // Check to see if the words are keywords
+                if (checkKeywords(word))
+                    Scanner::getPrintStatement(1001, word, lineNumber);
+                else
+                    Scanner::getPrintStatement(1002, word, lineNumber);
+
+                ungetc(character, file);
             }
-
-            // Check to see if the words are keywords
-            if (checkKeywords(word))
-                Scanner::getPrintStatement(1001, word, lineNumber);
-            else
-                Scanner::getPrintStatement(1002, word, lineNumber);
-
-            ungetc(character, file);
         } else {
             if (character != EOF) {
                 // Get columns
