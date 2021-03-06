@@ -90,7 +90,7 @@ int stateTable[22][22] = {
         { -1, -1,   -1,   -1,   -1,   -1,   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1023 }, // ]
 };
 
-void Scanner::scan() {
+void Scanner::scan(const char* fileName) {
     FILE *file;
     string tempString;
     char character, lookAhead;
@@ -98,7 +98,7 @@ void Scanner::scan() {
     int state = 0;
     int lineNumber = 1;
 
-    file = fopen("temp_data.txt", "r");
+    file = fopen(fileName, "r");
 
     do {
         // Grab our character
@@ -125,7 +125,7 @@ void Scanner::scan() {
             ungetc(lookAhead, file);
 
         // We need to begin checking for keywords
-        if (isalpha(character) || character == '_') {
+        if ((isalpha(character) || character == '_')) {
             // start a string array to check against keywords
             string word;
             word.push_back(character);
@@ -156,7 +156,6 @@ void Scanner::scan() {
                     string cToS(1, character);
                     Scanner::getErrorStatement(cToS, lineNumber);
                 } else {
-
                     // Search token
                     token = Scanner::searchTokens(state, column);
 

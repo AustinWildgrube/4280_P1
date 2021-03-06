@@ -56,8 +56,8 @@ int main(int argc, char** argv) {
         return 0;
     }
 
-//    Scanner::scan(fileName);
-    Scanner::scan();
+    auto back_to_cstr = fileName.c_str();
+    Scanner::scan(back_to_cstr);
 
     return 0;
 }

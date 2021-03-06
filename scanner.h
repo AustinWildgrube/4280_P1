@@ -7,7 +7,7 @@
 
 class Scanner {
     public:
-    static void scan();
+    static void scan(const char*);
 //        static void scan(const std::string&);
     private:
         static int getColumn(char);
