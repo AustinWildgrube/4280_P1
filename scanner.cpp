@@ -165,8 +165,6 @@ void Scanner::scan(FILE *file, char character, char lookAhead) {
             else
                 // Is not a keyword
                 Scanner::getPrintStatement(1002, word, lineNumber);
-
-            ungetc(character, file);
         }
 
     // The character is not a letter
