@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <cstdio>
+#include <iomanip>
 
 #include "scanner.h"
 
@@ -345,10 +346,10 @@ void Scanner::getPrintStatement(int tokenNumber, const string& userInput, int li
         token.name = tokenName[4];
     }
 
-    cout << token.lineNumber << "\t";
-    cout << token.name << "\t";
-    cout << token.id << "\t\t";
-    cout << token.successId << "\t\t";
+    cout << token.lineNumber << setw(20);
+    cout << token.name << setw(20);
+    cout << token.id << setw(20);
+    cout << token.successId << setw(20);
     cout << token.userInput << endl;
 }
 
