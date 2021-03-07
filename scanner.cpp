@@ -1,6 +1,6 @@
-//
-// Created by Austin Wildgrube on 2/25/21.
-//
+// Author: Austin Wildgrube <akwwb6@mail.umsl.edu>
+// Date: 03/08/2021
+
 #include <iostream>
 #include <string>
 #include <cstdio>
@@ -10,6 +10,7 @@
 
 using namespace std;
 
+// We can use this array to get the correct column
 char tokenArray[23] = {
         '_',
         'a',
@@ -97,10 +98,18 @@ int token, column;
 int state = 0;
 int lineNumber = 1;
 
+/**
+ * This is our scanner class that determines which token a character is.
+ * From here it calls a print statement within the class and will the return
+ * control back to the test driver.
+ * @param file
+ * @param character
+ * @param lookAhead
+ */
 void Scanner::scan(FILE *file, char character, char lookAhead) {
-    // Check for comments
+    // We need to start of checking for comments so we can immediately ignore them
     if (character == '$' && lookAhead == '$') {
-        //keep getting character if char is $ then look ahead
+        // We need to loop until we have two $$
         do {
             character = getc(file);
 
@@ -115,11 +124,15 @@ void Scanner::scan(FILE *file, char character, char lookAhead) {
 
         character = getc(file);
     } else
+        // Our look ahead will always go to far so we need to backtrack one step
         ungetc(lookAhead, file);
 
-    // We need to begin checking for keywords
+    // We need to begin checking for keywords and identifiers
     if ((isalpha(character) || character == '_') && tempString.empty()) {
+        // Identifiers can only begin with a lowercase letter if it doesn't start with an underscore
         if (character != '_' && !islower(character)) {
+            // If the identifier is wrongly formatted we need to collect the rest of the string so we
+            // can provide it in the output
             string word;
             word.push_back(character);
             character = getc(file);
@@ -131,8 +144,10 @@ void Scanner::scan(FILE *file, char character, char lookAhead) {
             }
 
             Scanner::getErrorStatement(word, lineNumber);
+
+        // We have a correctly formatter identifier
         } else {
-            // start a string array to check against keywords
+            // Collect characters into a string so we know the whole identifier at the end
             string word;
             word.push_back(character);
             character = getc(file);
@@ -145,37 +160,46 @@ void Scanner::scan(FILE *file, char character, char lookAhead) {
 
             // Check to see if the words are keywords
             if (checkKeywords(word))
+                // Is a keyword
                 Scanner::getPrintStatement(1001, word, lineNumber);
             else
+                // Is not a keyword
                 Scanner::getPrintStatement(1002, word, lineNumber);
 
             ungetc(character, file);
         }
+
+    // The character is not a letter
     } else {
         if (character != EOF) {
+
             // Get columns
             if (isdigit(character))
                 column = 2;
             else
                 column = Scanner::getColumn(character);
 
+            // If the getColumn function returns -99 it means that it is not a valid character
             if (column == -99 && character != '\n' && !isspace(character) && !isalpha(character)) {
                 string cToS(1, character);
                 Scanner::getErrorStatement(cToS, lineNumber);
+
+            // We have a valid character so now we need to search out state table
             } else {
-                // Search token
+                // Search state table
                 token = Scanner::searchTokens(state, column);
 
-                // If the states is not 0 and there is a space or new line just
-                // get the token without the look a head.
+                // If the state is not 0 and there is a space or new line just get the token without the look a head.
                 if (state != 0 && (character == '\n' || isspace(character) || isalpha(character))) {
                     token = Scanner::searchTokens(state, 21);
 
+                    // If our token returns -2 it means that we cannot have that token by itself ( ie < )
                     if (token == -2)
                         Scanner::getErrorStatement(tempString, lineNumber);
                     else
                         Scanner::getPrintStatement(token, tempString, lineNumber);
 
+                    // Clear our temp string, reset our state, and unget our look ahead character
                     tempString.clear();
                     ungetc(character, file);
                     state = 0;
@@ -186,7 +210,7 @@ void Scanner::scan(FILE *file, char character, char lookAhead) {
 
                         tempString.push_back(character);
 
-                        // We reached a final token
+                    // We reached a final token
                     } else if (token >= 1000 && token <= 1023) {
                         if (!tempString.empty()) {
                             tempString.push_back(character);
@@ -199,7 +223,7 @@ void Scanner::scan(FILE *file, char character, char lookAhead) {
 
                         state = 0;
 
-                        // There was no white space between tokens and the two did not go together
+                    // There was no white space between tokens and the two did not go together
                     } else if (token == -1) {
                         token = Scanner::searchTokens(state, 21);
 
@@ -215,10 +239,13 @@ void Scanner::scan(FILE *file, char character, char lookAhead) {
                             Scanner::getErrorStatement(cToS, lineNumber);
                         } else
                             Scanner::getErrorStatement(tempString, lineNumber);
+
                         tempString.clear();
                     }
                 }
             }
+
+        // We reached our end of function so we should print it
         } else {
             if (!tempString.empty()) {
                 token = Scanner::searchTokens(state, 21);
@@ -235,6 +262,12 @@ void Scanner::scan(FILE *file, char character, char lookAhead) {
     }
 }
 
+/**
+ * We need to look into the token array to see if the character is a valid character in our language.
+ * If it is we return the position and if it is not we return -99.
+ * @param character
+ * @return
+ */
 int Scanner::getColumn(char character) {
     // Loop through valid tokens
     for (int i = 0; i < sizeof(tokenArray) / sizeof(tokenArray[0]); i++) {
@@ -247,11 +280,22 @@ int Scanner::getColumn(char character) {
     return -99;
 }
 
+/**
+ * We simply return the value found in the FSA table.
+ * @param tokenState
+ * @param tokenColumn
+ * @return num
+ */
 int Scanner::searchTokens(int tokenState, int tokenColumn) {
     // return state or token
     return stateTable[tokenState][tokenColumn];
 }
 
+/**
+ * We need to check our identifiers against the keywords. Here we return true if found and false if not.
+ * @param word
+ * @return bool
+ */
 bool Scanner::checkKeywords(const string &word) {
     string keywordArray[20] = {
             "begin",
@@ -281,25 +325,32 @@ bool Scanner::checkKeywords(const string &word) {
     return false;
 }
 
+/**
+ * This is where we set the info about our token and then print it.
+ * @param tokenNumber
+ * @param userInput
+ * @param lineNumber
+ */
 void Scanner::getPrintStatement(int tokenNumber, const string& userInput, int lineNumber) {
     string tokenID[] {
-            "KW_tk",
-            "ID_tk",
-            "NUM_tk",
-            "OP_tk",
-            "DEL_tk",
-            "EOF_tk"
+        "KW_tk",
+        "ID_tk",
+        "NUM_tk",
+        "OP_tk",
+        "DEL_tk",
+        "EOF_tk"
     };
 
     string tokenName[] {
-            "Keyword",
-            "Identifier",
-            "Number",
-            "Operator",
-            "Delimiter",
-            "End of Line"
+        "Keyword",
+        "Identifier",
+        "Number",
+        "Operator",
+        "Delimiter",
+        "End of Line"
     };
 
+    // Our Token struct is what we print from
     struct Token {
         string id;
         string name;
@@ -309,10 +360,13 @@ void Scanner::getPrintStatement(int tokenNumber, const string& userInput, int li
     };
 
     Token returnToken;
+
+    // Set basic token info
     returnToken.successId = tokenNumber;
     returnToken.userInput = userInput;
     returnToken.lineNumber = lineNumber;
 
+    // Based on the success id we give it a specific token name/id
     if (tokenNumber == 1000) {
         returnToken.id = tokenID[5];
         returnToken.name = tokenName[5];
@@ -333,6 +387,7 @@ void Scanner::getPrintStatement(int tokenNumber, const string& userInput, int li
         returnToken.name = tokenName[4];
     }
 
+    // Print our token
     cout << returnToken.lineNumber << setw(20);
     cout << returnToken.name << setw(20);
     cout << returnToken.id << setw(20);
@@ -340,6 +395,11 @@ void Scanner::getPrintStatement(int tokenNumber, const string& userInput, int li
     cout << returnToken.userInput << endl;
 }
 
+/**
+ * Instead of handling errors in the getPrintStatement function we seperated the two.
+ * @param userInput
+ * @param lineNumber
+ */
 void Scanner::getErrorStatement(const string& userInput, int lineNumber) {
     cout << endl;
     cout << "SCANNER ERROR" << endl;

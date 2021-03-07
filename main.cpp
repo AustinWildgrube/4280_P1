@@ -52,6 +52,7 @@ int main(int argc, char** argv) {
         return 0;
     }
 
+    // To use ofstream it needed a string literal or a C String so we have to convert it
     auto back_to_cstr = fileName.c_str();
     TestScanner::testDriver(back_to_cstr);
 
