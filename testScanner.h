@@ -5,4 +5,9 @@
 #ifndef TESTSCANNER_H
 #define TESTSCANNER_H
 
+class TestScanner {
+    public:
+        static void testDriver(const char*);
+};
+
 #endif //TESTSCANNER_H

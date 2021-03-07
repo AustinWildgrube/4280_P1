@@ -11,27 +11,27 @@
 using namespace std;
 
 char tokenArray[23] = {
-    '_',
-    'a',
-    '1',
-    '=',
-    '>',
-    '<',
-    ':',
-    '+',
-    '-',
-    '*',
-    '/',
-    '%',
-    '.',
-    '(',
-    ')',
-    ',',
-    '{',
-    '}',
-    ';',
-    '[',
-    ']',
+        '_',
+        'a',
+        '1',
+        '=',
+        '>',
+        '<',
+        ':',
+        '+',
+        '-',
+        '*',
+        '/',
+        '%',
+        '.',
+        '(',
+        ')',
+        ',',
+        '{',
+        '}',
+        ';',
+        '[',
+        ']',
 };
 
 int stateTable[22][22] = {
@@ -66,7 +66,7 @@ int stateTable[22][22] = {
             1022: [
             1023: ]
         */
-     // { _   a     1     =     >     <     :   +   -   *   /   %   .   (   )   ,   {   }   ;   [   ]   ws   }
+    //  { _   a     1     =     >     <     :   +   -   *   /   %   .   (   )   ,   {   }   ;   [   ]   ws   }
         { 1,  2,    3,    4,    5,    6,    7,  8,  9,  10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22   }, // State 0
 
         { -1, 1002, 1002, -1,   -2,   -1,   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2   }, // _
@@ -92,160 +92,147 @@ int stateTable[22][22] = {
         { -1, -1,   -1,   -1,   -1,   -1,   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1023 }, // ]
 };
 
-void Scanner::scan(const char* fileName) {
-    FILE *file;
-    string tempString;
-    char character, lookAhead;
-    int token, column;
-    int state = 0;
-    int lineNumber = 1;
+string tempString;
+int token, column;
+int state = 0;
+int lineNumber = 1;
 
-    file = fopen(fileName, "r");
-
-    do {
-        // Grab our character
-        character = getc(file);
-        lookAhead = getc(file);
-
-        // Check for comments
-        if (character == '$' && lookAhead == '$') {
-           //keep getting character if char is $ then look ahead
-           do {
-               character = getc(file);
-
-               if (character == '$') {
-                   lookAhead = getc(file);
-
-                   if (lookAhead != '$') {
-                       character = getc(file);
-                   }
-               }
-           } while (character != '$');
-
+void Scanner::scan(FILE *file, char character, char lookAhead) {
+    // Check for comments
+    if (character == '$' && lookAhead == '$') {
+        //keep getting character if char is $ then look ahead
+        do {
             character = getc(file);
-        } else
-            ungetc(lookAhead, file);
 
-        // We need to begin checking for keywords
-        if ((isalpha(character) || character == '_') && tempString.empty()) {
-            if (character != '_' && !islower(character)) {
-                string word;
-                word.push_back(character);
-                character = getc(file);
+            if (character == '$') {
+                lookAhead = getc(file);
 
-                while (!isspace(character) && character != '\n' && (isalpha(character) || isdigit(character))) {
-                    // Add to string
-                    word.push_back(character);
+                if (lookAhead != '$') {
                     character = getc(file);
                 }
-
-                Scanner::getErrorStatement(word, lineNumber);
-            } else {
-                // start a string array to check against keywords
-                string word;
-                word.push_back(character);
-                character = getc(file);
-
-                while (!isspace(character) && character != '\n' && (isalpha(character) || isdigit(character))) {
-                    // Add to string
-                    word.push_back(character);
-                    character = getc(file);
-                }
-
-                // Check to see if the words are keywords
-                if (checkKeywords(word))
-                    Scanner::getPrintStatement(1001, word, lineNumber);
-                else
-                    Scanner::getPrintStatement(1002, word, lineNumber);
-
-                ungetc(character, file);
             }
+        } while (character != '$');
+
+        character = getc(file);
+    } else
+        ungetc(lookAhead, file);
+
+    // We need to begin checking for keywords
+    if ((isalpha(character) || character == '_') && tempString.empty()) {
+        if (character != '_' && !islower(character)) {
+            string word;
+            word.push_back(character);
+            character = getc(file);
+
+            while (!isspace(character) && character != '\n' && (isalpha(character) || isdigit(character))) {
+                // Add to string
+                word.push_back(character);
+                character = getc(file);
+            }
+
+            Scanner::getErrorStatement(word, lineNumber);
         } else {
-            if (character != EOF) {
-                // Get columns
-                if (isdigit(character))
-                    column = 2;
-                else
-                    column = Scanner::getColumn(character);
+            // start a string array to check against keywords
+            string word;
+            word.push_back(character);
+            character = getc(file);
 
-                if (column == -99 && character != '\n' && !isspace(character) && !isalpha(character)) {
-                    string cToS(1, character);
-                    Scanner::getErrorStatement(cToS, lineNumber);
-                } else {
-                    // Search token
-                    token = Scanner::searchTokens(state, column);
+            while (!isspace(character) && character != '\n' && (isalpha(character) || isdigit(character))) {
+                // Add to string
+                word.push_back(character);
+                character = getc(file);
+            }
 
-                    // If the states is not 0 and there is a space or new line just
-                    // get the token without the look a head.
-                    if (state != 0 && (character == '\n' || isspace(character) || isalpha(character))) {
-                        token = Scanner::searchTokens(state, 21);
+            // Check to see if the words are keywords
+            if (checkKeywords(word))
+                Scanner::getPrintStatement(1001, word, lineNumber);
+            else
+                Scanner::getPrintStatement(1002, word, lineNumber);
 
-                        if (token == -2)
-                            Scanner::getErrorStatement(tempString, lineNumber);
-                        else
-                            Scanner::getPrintStatement(token, tempString, lineNumber);
+            ungetc(character, file);
+        }
+    } else {
+        if (character != EOF) {
+            // Get columns
+            if (isdigit(character))
+                column = 2;
+            else
+                column = Scanner::getColumn(character);
 
-                        tempString.clear();
-                        ungetc(character, file);
-                        state = 0;
-                    } else {
-                        // Token search returned another state
-                        if (token > 0 && token <= 22) {
-                            state = token;
-
-                            tempString.push_back(character);
-
-                            // We reached a final token
-                        } else if (token >= 1000 && token <= 1023) {
-                            if (!tempString.empty()) {
-                                tempString.push_back(character);
-                                Scanner::getPrintStatement(token, tempString, lineNumber);
-                                tempString.clear();
-                            } else {
-                                string characterToString(1, character);
-                                Scanner::getPrintStatement(token, characterToString, lineNumber);
-                            }
-
-                            state = 0;
-
-                            // There was no white space between tokens and the two did not go together
-                        } else if (token == -1) {
-                            token = Scanner::searchTokens(state, 21);
-
-                            Scanner::getPrintStatement(token, tempString, lineNumber);
-                            tempString.clear();
-
-                            // Reset our state and put back the look ahead character
-                            state = 0;
-                            ungetc(character, file);
-                        } else if (token == -2) {
-                            if (tempString.empty()) {
-                                string cToS(1, character);
-                                Scanner::getErrorStatement(cToS, lineNumber);
-                            } else
-                                Scanner::getErrorStatement(tempString, lineNumber);
-                            tempString.clear();
-                        }
-                    }
-                }
+            if (column == -99 && character != '\n' && !isspace(character) && !isalpha(character)) {
+                string cToS(1, character);
+                Scanner::getErrorStatement(cToS, lineNumber);
             } else {
-                if (!tempString.empty()) {
+                // Search token
+                token = Scanner::searchTokens(state, column);
+
+                // If the states is not 0 and there is a space or new line just
+                // get the token without the look a head.
+                if (state != 0 && (character == '\n' || isspace(character) || isalpha(character))) {
                     token = Scanner::searchTokens(state, 21);
 
-                    Scanner::getPrintStatement(token, tempString, lineNumber);
+                    if (token == -2)
+                        Scanner::getErrorStatement(tempString, lineNumber);
+                    else
+                        Scanner::getPrintStatement(token, tempString, lineNumber);
+
+                    tempString.clear();
+                    ungetc(character, file);
+                    state = 0;
+                } else {
+                    // Token search returned another state
+                    if (token > 0 && token <= 22) {
+                        state = token;
+
+                        tempString.push_back(character);
+
+                        // We reached a final token
+                    } else if (token >= 1000 && token <= 1023) {
+                        if (!tempString.empty()) {
+                            tempString.push_back(character);
+                            Scanner::getPrintStatement(token, tempString, lineNumber);
+                            tempString.clear();
+                        } else {
+                            string characterToString(1, character);
+                            Scanner::getPrintStatement(token, characterToString, lineNumber);
+                        }
+
+                        state = 0;
+
+                        // There was no white space between tokens and the two did not go together
+                    } else if (token == -1) {
+                        token = Scanner::searchTokens(state, 21);
+
+                        Scanner::getPrintStatement(token, tempString, lineNumber);
+                        tempString.clear();
+
+                        // Reset our state and put back the look ahead character
+                        state = 0;
+                        ungetc(character, file);
+                    } else if (token == -2) {
+                        if (tempString.empty()) {
+                            string cToS(1, character);
+                            Scanner::getErrorStatement(cToS, lineNumber);
+                        } else
+                            Scanner::getErrorStatement(tempString, lineNumber);
+                        tempString.clear();
+                    }
                 }
             }
+        } else {
+            if (!tempString.empty()) {
+                token = Scanner::searchTokens(state, 21);
+
+                Scanner::getPrintStatement(token, tempString, lineNumber);
+            }
         }
+    }
 
-        // Increase line number if we reach a new row
-        if (character == '\n') {
-            lineNumber++;
-            character = getc(file);
-        }
-
-    } while (character != EOF);
-
-    getPrintStatement(1000, "", lineNumber);
+    // Increase line number if we reach a new row
+    if (character == '\n') {
+        lineNumber++;
+        character = getc(file);
+    }
 }
 
 int Scanner::getColumn(char character) {
@@ -260,27 +247,27 @@ int Scanner::getColumn(char character) {
     return -99;
 }
 
-int Scanner::searchTokens(int state, int column) {
+int Scanner::searchTokens(int tokenState, int tokenColumn) {
     // return state or token
-    return stateTable[state][column];
+    return stateTable[tokenState][tokenColumn];
 }
 
 bool Scanner::checkKeywords(const string &word) {
     string keywordArray[20] = {
-        "begin",
-        "end",
-        "loop",
-        "whole",
-        "void",
-        "exit",
-        "getter",
-        "outter",
-        "main",
-        "if",
-        "then",
-        "assign",
-        "data",
-        "proc"
+            "begin",
+            "end",
+            "loop",
+            "whole",
+            "void",
+            "exit",
+            "getter",
+            "outter",
+            "main",
+            "if",
+            "then",
+            "assign",
+            "data",
+            "proc"
     };
 
     // Loop through valid keywords
@@ -296,61 +283,61 @@ bool Scanner::checkKeywords(const string &word) {
 
 void Scanner::getPrintStatement(int tokenNumber, const string& userInput, int lineNumber) {
     string tokenID[] {
-        "KW_tk",
-        "ID_tk",
-        "NUM_tk",
-        "OP_tk",
-        "DEL_tk",
-        "EOF_tk"
+            "KW_tk",
+            "ID_tk",
+            "NUM_tk",
+            "OP_tk",
+            "DEL_tk",
+            "EOF_tk"
     };
 
     string tokenName[] {
-        "Keyword",
-        "Identifier",
-        "Number",
-        "Operator",
-        "Delimiter",
-        "End of Line"
+            "Keyword",
+            "Identifier",
+            "Number",
+            "Operator",
+            "Delimiter",
+            "End of Line"
     };
 
     struct Token {
         string id;
         string name;
-        int successId = 0;
         string userInput;
+        int successId = 0;
         int lineNumber = 0;
     };
 
-    Token token;
-    token.successId = tokenNumber;
-    token.userInput = userInput;
-    token.lineNumber = lineNumber;
+    Token returnToken;
+    returnToken.successId = tokenNumber;
+    returnToken.userInput = userInput;
+    returnToken.lineNumber = lineNumber;
 
     if (tokenNumber == 1000) {
-        token.id = tokenID[5];
-        token.name = tokenName[5];
+        returnToken.id = tokenID[5];
+        returnToken.name = tokenName[5];
     } else if (tokenNumber == 1001) {
-        token.id = tokenID[0];
-        token.name = tokenName[0];
+        returnToken.id = tokenID[0];
+        returnToken.name = tokenName[0];
     } else if (tokenNumber == 1002) {
-        token.id = tokenID[1];
-        token.name = tokenName[1];
+        returnToken.id = tokenID[1];
+        returnToken.name = tokenName[1];
     } else if (tokenNumber == 1003) {
-        token.id = tokenID[2];
-        token.name = tokenName[2];
+        returnToken.id = tokenID[2];
+        returnToken.name = tokenName[2];
     } else if (tokenNumber >= 1004 && tokenNumber <= 1014) {
-        token.id = tokenID[3];
-        token.name = tokenName[3];
+        returnToken.id = tokenID[3];
+        returnToken.name = tokenName[3];
     } else if (tokenNumber >= 1015) {
-        token.id = tokenID[4];
-        token.name = tokenName[4];
+        returnToken.id = tokenID[4];
+        returnToken.name = tokenName[4];
     }
 
-    cout << token.lineNumber << setw(20);
-    cout << token.name << setw(20);
-    cout << token.id << setw(20);
-    cout << token.successId << setw(20);
-    cout << token.userInput << endl;
+    cout << returnToken.lineNumber << setw(20);
+    cout << returnToken.name << setw(20);
+    cout << returnToken.id << setw(20);
+    cout << returnToken.successId << setw(20);
+    cout << returnToken.userInput << endl;
 }
 
 void Scanner::getErrorStatement(const string& userInput, int lineNumber) {

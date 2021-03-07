@@ -142,3 +142,4 @@ Temporary Items
 /CMakeLists.txt
 /P1
 /scanner.o
+/testScanner.o
