@@ -247,11 +247,16 @@ void Scanner::scan(FILE *file, char character, char lookAhead) {
 
         // We reached our end of function so we should print it
         } else {
+            // Our temp string isn't empty which means we have another character to print
             if (!tempString.empty()) {
+                // Check the last one
                 token = Scanner::searchTokens(state, 21);
 
                 Scanner::getPrintStatement(token, tempString, lineNumber);
             }
+
+            // Print our EOF
+            getPrintStatement(1000, "", lineNumber);
         }
     }
 
