@@ -199,9 +199,8 @@ void Scanner::scan(FILE *file, char character, char lookAhead) {
                     else
                         Scanner::getPrintStatement(token, tempString, lineNumber);
 
-                    // Clear our temp string, reset our state, and unget our look ahead character
+                    // Clear our temp string and reset our state
                     tempString.clear();
-                    ungetc(character, file);
                     state = 0;
                 } else {
                     // Token search returned another state
@@ -263,7 +262,6 @@ void Scanner::scan(FILE *file, char character, char lookAhead) {
     // Increase line number if we reach a new row
     if (character == '\n') {
         lineNumber++;
-        character = getc(file);
     }
 }
 
@@ -401,7 +399,7 @@ void Scanner::getPrintStatement(int tokenNumber, const string& userInput, int li
 }
 
 /**
- * Instead of handling errors in the getPrintStatement function we seperated the two.
+ * Instead of handling errors in the getPrintStatement function we separated the two.
  * @param userInput
  * @param lineNumber
  */
