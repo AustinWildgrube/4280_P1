@@ -348,7 +348,7 @@ void Scanner::getPrintStatement(int tokenNumber, const string& userInput, int li
         "Number",
         "Operator",
         "Delimiter",
-        "End of Line"
+        "End of File"
     };
 
     // Our Token struct is what we print from
