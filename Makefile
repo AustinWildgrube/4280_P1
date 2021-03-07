@@ -1,7 +1,7 @@
 OBJS	= main.o scanner.o
 SOURCE	= main.cpp scanner.cpp
 HEADER	= scanner.h
-OUT	    = P1
+OUT	    = scanner
 CC	    = g++
 FLAGS	= -g -c -Wall
 
