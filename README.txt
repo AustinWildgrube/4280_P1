@@ -1,5 +1,5 @@
-I am using option 3 with the driver and FSA table. The driver is in the testScanner.cpp file starting on line 16. The
-FSA table is in the scanner.cpp file and starts on line 38. I am also counting lines.
+I am using option 3 with the driver and FSA table. The driver is in the testScanner.cpp file starting on line 16.
+The FSA table is in the scanner.cpp file and starts on line 38. I am also counting lines.
 
 Title: P1: The Scanner
 Author: Austin Wildgrube - akww6@umsystems.edu
