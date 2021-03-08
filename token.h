@@ -1,6 +1,5 @@
-//
-// Created by Austin Wildgrube on 2/25/21.
-//
+// Author: Austin Wildgrube <akwwb6@mail.umsl.edu>
+// Date: 03/08/2021
 
 #ifndef TOKEN_H
 #define TOKEN_H

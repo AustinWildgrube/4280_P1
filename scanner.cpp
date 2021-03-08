@@ -318,13 +318,13 @@ bool Scanner::checkKeywords(const string &word) {
  * @param userInput
  * @param lineNumber
  */
-void Scanner::getPrintStatement(int tokenNumber, const string& userInput, int lineNumber) {
+void Scanner::getPrintStatement(int tokenNumber, const string& userInput, int tokenLineNumber) {
     Token returnToken;
 
     // Set basic token info
     returnToken.successId = tokenNumber;
     returnToken.userInput = userInput;
-    returnToken.lineNumber = lineNumber;
+    returnToken.lineNumber = tokenLineNumber;
 
     // Based on the success id we give it a specific token name/id
     if (tokenNumber == 1000) {
@@ -360,10 +360,10 @@ void Scanner::getPrintStatement(int tokenNumber, const string& userInput, int li
  * @param userInput
  * @param lineNumber
  */
-void Scanner::getErrorStatement(const string& userInput, int lineNumber) {
+void Scanner::getErrorStatement(const string& userInput, int tokenLineNumber) {
     cout << endl;
     cout << "SCANNER ERROR" << endl;
-    cout << "Line Number " << lineNumber << endl;
+    cout << "Line Number " << tokenLineNumber << endl;
     cout << "Invalid Syntax " << userInput << endl;
     cout << endl;
 }
