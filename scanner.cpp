@@ -128,7 +128,7 @@ void Scanner::scan(FILE *file, char character, char lookAhead) {
         ungetc(lookAhead, file);
 
     // We need to begin checking for keywords and identifiers
-    if ((isalpha(character) || character == '_') && tempString.empty()) {
+    if ((isalpha(character) || character == '_')) {
         // Identifiers can only begin with a lowercase letter if it doesn't start with an underscore
         if (character != '_' && !islower(character)) {
             // If the identifier is wrongly formatted we need to collect the rest of the string so we
