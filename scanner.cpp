@@ -7,6 +7,7 @@
 #include <iomanip>
 
 #include "scanner.h"
+#include "token.h"
 
 using namespace std;
 
@@ -37,7 +38,6 @@ char tokenArray[23] = {
 
 int stateTable[22][22] = {
         /*
-            -3  : Part of long token ignore
             -2  : Incorrect start token
             -1  : Incorrect next token
 
@@ -298,23 +298,6 @@ int Scanner::searchTokens(int tokenState, int tokenColumn) {
  * @return bool
  */
 bool Scanner::checkKeywords(const string &word) {
-    string keywordArray[20] = {
-            "begin",
-            "end",
-            "loop",
-            "whole",
-            "void",
-            "exit",
-            "getter",
-            "outter",
-            "main",
-            "if",
-            "then",
-            "assign",
-            "data",
-            "proc"
-    };
-
     // Loop through valid keywords
     for (auto &i : keywordArray) {
         // Check if keywords is in array and return if found
@@ -333,33 +316,6 @@ bool Scanner::checkKeywords(const string &word) {
  * @param lineNumber
  */
 void Scanner::getPrintStatement(int tokenNumber, const string& userInput, int lineNumber) {
-    string tokenID[] {
-        "KW_tk",
-        "ID_tk",
-        "NUM_tk",
-        "OP_tk",
-        "DEL_tk",
-        "EOF_tk"
-    };
-
-    string tokenName[] {
-        "Keyword",
-        "Identifier",
-        "Number",
-        "Operator",
-        "Delimiter",
-        "End of File"
-    };
-
-    // Our Token struct is what we print from
-    struct Token {
-        string id;
-        string name;
-        string userInput;
-        int successId = 0;
-        int lineNumber = 0;
-    };
-
     Token returnToken;
 
     // Set basic token info
