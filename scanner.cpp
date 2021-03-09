@@ -274,7 +274,7 @@ void Scanner::scan(FILE *file, char character, char lookAhead) {
  */
 int Scanner::getColumn(char character) {
     // Loop through valid tokens
-    for (int i = 0; i < sizeof(tokenArray) / sizeof(tokenArray[0]); i++) {
+    for (int i = 0; i < 23; i++) {
         // Check if token is in array and return if found
         if (tokenArray[i] == character)
             return i;
